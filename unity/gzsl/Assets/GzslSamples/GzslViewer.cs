@@ -45,16 +45,20 @@ public class GzslViewer : UnityEngine.MonoBehaviour {
       file_type = "gzsl";
     }
     
+    UnityEngine.Debug.Log( Date.Now() +" WebGetAsync start" );
     string url = "https://short-works.herokuapp.com/"+ file_type +"/view.json?url="+ m_URLInputField.GetComponentsInChildren< UnityEngine.UI.Text >()[ 1 ].text;
     UnityEngine.Debug.Log( url );
     StartCoroutine( WebGetAsync( url, ( int code, string body ) => {
-      StartCoroutine( m_Gzsl.LoadFromJsonAsync( body, () => {
+      UnityEngine.Debug.Log( Date.Now() +" WebGetAsync complete" );
+      m_Gzsl.LoadFromJson( body, () => {
+        UnityEngine.Debug.Log( Date.Now() +" Gzsl.LoadFromJson complete" );
         m_GzslIndex = 0;
         m_SlideImage.sprite = m_Gzsl.GetImageSprite( ref m_GzslIndex );
         if ( null != m_SlideImage.sprite ) m_SlideImage.GetComponent< UnityEngine.RectTransform >().sizeDelta = new UnityEngine.Vector2( m_SlideImage.sprite.rect.width, m_SlideImage.sprite.rect.height );
+        UnityEngine.Debug.Log( Date.Now() +" finish" );
       }, ( System.Exception exception ) => {
         UnityEngine.Debug.LogError( exception +"\n"+ body );
-      } ) );
+      } );
     }, ( string msg ) => {
       UnityEngine.Debug.LogError( msg );
     } ) );
