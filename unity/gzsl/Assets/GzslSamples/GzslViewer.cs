@@ -8,8 +8,7 @@ public class GzslViewer : UnityEngine.MonoBehaviour {
   
   private UnityEngine.UI.Image m_SlideImage;
   
-  private delegate void OnWebError( string msg );
-  private delegate void OnWebComplete( int code, string body );
+  private Web m_Web;
   
   private Gzsl m_Gzsl;
   private int m_GzslIndex;
@@ -25,7 +24,9 @@ public class GzslViewer : UnityEngine.MonoBehaviour {
     
     m_SlideImage = UnityEngine.GameObject.Find( "SlideImage" ).GetComponent< UnityEngine.UI.Image >();
     
-    m_Gzsl = new Gzsl();
+    m_Web = new Web( this );
+    
+    m_Gzsl = new Gzsl( this );
     m_GzslIndex = 0;
   }
   
@@ -39,40 +40,26 @@ public class GzslViewer : UnityEngine.MonoBehaviour {
     }
   }
   
+  private void OnGzslLoadComplete( Gzsl gzsl ){
+    m_GzslIndex = 0;
+    m_SlideImage.sprite = m_Gzsl.GetImageSprite( ref m_GzslIndex );
+    if ( null != m_SlideImage.sprite ) m_SlideImage.GetComponent< UnityEngine.RectTransform >().sizeDelta = new UnityEngine.Vector2( m_SlideImage.sprite.rect.width, m_SlideImage.sprite.rect.height );
+  }
+  
   public void OnClickLoadButton(){
     string file_type = "pdf";
     if ( m_GZSLFileTypeToggle.isOn ){
       file_type = "gzsl";
     }
     
-    UnityEngine.Debug.Log( Date.Now() +" WebGetAsync start" );
-    string url = "https://short-works.herokuapp.com/"+ file_type +"/view.json?url="+ m_URLInputField.GetComponentsInChildren< UnityEngine.UI.Text >()[ 1 ].text;
+    string url = "https://short-works.herokuapp.com/"+ file_type +"/view.json?url="+ m_URLInputField.text;
     UnityEngine.Debug.Log( url );
-    StartCoroutine( WebGetAsync( url, ( int code, string body ) => {
-      UnityEngine.Debug.Log( Date.Now() +" WebGetAsync complete" );
-      m_Gzsl.LoadFromJson( body, () => {
-        UnityEngine.Debug.Log( Date.Now() +" Gzsl.LoadFromJson complete" );
-        m_GzslIndex = 0;
-        m_SlideImage.sprite = m_Gzsl.GetImageSprite( ref m_GzslIndex );
-        if ( null != m_SlideImage.sprite ) m_SlideImage.GetComponent< UnityEngine.RectTransform >().sizeDelta = new UnityEngine.Vector2( m_SlideImage.sprite.rect.width, m_SlideImage.sprite.rect.height );
-        UnityEngine.Debug.Log( Date.Now() +" finish" );
-      }, ( System.Exception exception ) => {
-        UnityEngine.Debug.LogError( exception +"\n"+ body );
+    m_Web.GetAsync( url, 60, ( int code, string text, byte[] bytes ) => {
+      m_Gzsl.LoadFromJsonAsync( text, OnGzslLoadComplete, ( Gzsl gzsl, System.Exception exception ) => {
+        UnityEngine.Debug.LogError( exception +"\n"+ text );
       } );
     }, ( string msg ) => {
       UnityEngine.Debug.LogError( msg );
-    } ) );
-  }
-  
-  private System.Collections.IEnumerator WebGetAsync( string url, OnWebComplete on_web_complete, OnWebError on_web_error ){
-    UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get( url );
-    request.timeout = 60;
-    yield return request.SendWebRequest();
-    
-    if ( request.isNetworkError || request.isHttpError ){
-      on_web_error( request.error );
-    }else{
-      on_web_complete( (int)request.responseCode, request.downloadHandler.text );
-    }
+    } );
   }
 }
