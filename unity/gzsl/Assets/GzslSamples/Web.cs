@@ -1,8 +1,8 @@
 public class Web {
   private UnityEngine.MonoBehaviour m_MonoBehaviour;
   
-  public delegate void OnWebComplete( int code, string text, byte[] bytes );
-  public delegate void OnWebError( string msg );
+  public delegate void OnWebComplete( UnityEngine.Networking.UnityWebRequest request );
+  public delegate void OnWebError( UnityEngine.Networking.UnityWebRequest request );
   
   public Web( UnityEngine.MonoBehaviour mono_behaviour ){
     m_MonoBehaviour = mono_behaviour;
@@ -14,13 +14,13 @@ public class Web {
     yield return request.SendWebRequest();
     
     if ( request.isNetworkError || request.isHttpError ){
-      on_web_error( request.error );
+      on_web_error( request );
     }else{
-      on_web_complete( (int)request.responseCode, request.downloadHandler.text, request.downloadHandler.data );
+      on_web_complete( request );
     }
   }
   
-  public void GetAsync( string url, int timeout, OnWebComplete on_web_complete, OnWebError on_web_error ){
+  public void Get( string url, int timeout, OnWebComplete on_web_complete, OnWebError on_web_error ){
     m_MonoBehaviour.StartCoroutine( GetCoroutine( url, timeout, on_web_complete, on_web_error ) );
   }
 }

@@ -47,19 +47,26 @@ public class GzslViewer : UnityEngine.MonoBehaviour {
   }
   
   public void OnClickLoadButton(){
-    string file_type = "pdf";
-    if ( m_GZSLFileTypeToggle.isOn ){
-      file_type = "gzsl";
-    }
-    
-    string url = "https://short-works.herokuapp.com/"+ file_type +"/view.json?url="+ m_URLInputField.text;
-    UnityEngine.Debug.Log( url );
-    m_Web.GetAsync( url, 60, ( int code, string text, byte[] bytes ) => {
-      m_Gzsl.LoadFromJsonAsync( text, OnGzslLoadComplete, ( Gzsl gzsl, System.Exception exception ) => {
-        UnityEngine.Debug.LogError( exception +"\n"+ text );
+    string url = m_URLInputField.text;
+    if ( m_PDFFileTypeToggle.isOn ){
+      url = "https://short-works.herokuapp.com/pdf/view.json?url="+ url;
+      UnityEngine.Debug.Log( url );
+      m_Web.Get( url, 60, ( UnityEngine.Networking.UnityWebRequest request ) => {
+        m_Gzsl.LoadFromJson( request.downloadHandler.text, OnGzslLoadComplete, ( Gzsl gzsl, System.Exception exception ) => {
+          UnityEngine.Debug.LogError( exception +"\n"+ request.downloadHandler.text );
+        } );
+      }, ( UnityEngine.Networking.UnityWebRequest request ) => {
+        UnityEngine.Debug.LogError( request.error );
       } );
-    }, ( string msg ) => {
-      UnityEngine.Debug.LogError( msg );
-    } );
+    }else if ( m_GZSLFileTypeToggle.isOn ){
+      UnityEngine.Debug.Log( url );
+      m_Web.Get( url, 60, ( UnityEngine.Networking.UnityWebRequest request ) => {
+        m_Gzsl.Load( request.downloadHandler.data, OnGzslLoadComplete, ( Gzsl gzsl, System.Exception exception ) => {
+          UnityEngine.Debug.LogError( exception );
+        } );
+      }, ( UnityEngine.Networking.UnityWebRequest request ) => {
+        UnityEngine.Debug.LogError( request.error );
+      } );
+    }
   }
 }
