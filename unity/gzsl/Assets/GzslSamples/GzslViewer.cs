@@ -54,7 +54,7 @@ public class GzslViewer : UnityEngine.MonoBehaviour {
       m_Web.Get( url, 60, ( UnityEngine.Networking.UnityWebRequest request ) => {
         m_Gzsl.LoadFromJson( request.downloadHandler.text, OnGzslLoadComplete, ( Gzsl gzsl, System.Exception exception ) => {
           UnityEngine.Debug.LogError( exception +"\n"+ request.downloadHandler.text );
-        } );
+        }, true );
       }, ( UnityEngine.Networking.UnityWebRequest request ) => {
         UnityEngine.Debug.LogError( request.error );
       } );
@@ -63,7 +63,7 @@ public class GzslViewer : UnityEngine.MonoBehaviour {
       m_Web.Get( url, 60, ( UnityEngine.Networking.UnityWebRequest request ) => {
         m_Gzsl.Load( request.downloadHandler.data, OnGzslLoadComplete, ( Gzsl gzsl, System.Exception exception ) => {
           UnityEngine.Debug.LogError( exception );
-        } );
+        }, true );
       }, ( UnityEngine.Networking.UnityWebRequest request ) => {
         UnityEngine.Debug.LogError( request.error );
       } );

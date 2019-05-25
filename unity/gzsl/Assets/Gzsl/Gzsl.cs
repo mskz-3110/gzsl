@@ -27,7 +27,7 @@ public class Gzsl {
   public delegate void OnLoadComplete( Gzsl gzsl );
   public delegate void OnLoadError( Gzsl gzsl, System.Exception exception );
   
-  private System.Collections.IEnumerator ParseCoroutine( byte[] bytes, OnParseComplete on_parse_complete, OnParseError on_parse_error, bool is_async = true ){
+  private System.Collections.IEnumerator ParseCoroutine( byte[] bytes, OnParseComplete on_parse_complete, OnParseError on_parse_error, bool is_async ){
     int offset = 0;
     byte flags = 0;
     try{
@@ -67,11 +67,11 @@ public class Gzsl {
     on_parse_complete( data );
   }
   
-  public void Parse( byte[] bytes, OnParseComplete on_parse_complete, OnParseError on_parse_error, bool is_async = true ){
+  public void Parse( byte[] bytes, OnParseComplete on_parse_complete, OnParseError on_parse_error, bool is_async ){
     m_MonoBehaviour.StartCoroutine( ParseCoroutine( bytes, on_parse_complete, on_parse_error, is_async ) );
   }
   
-  private System.Collections.IEnumerator ParseFromJsonCoroutine( string json, OnParseComplete on_parse_complete, OnParseError on_parse_error, bool is_async = true ){
+  private System.Collections.IEnumerator ParseFromJsonCoroutine( string json, OnParseComplete on_parse_complete, OnParseError on_parse_error, bool is_async ){
     JsonData json_data;
     try{
       json_data = UnityEngine.JsonUtility.FromJson< JsonData >( json );
@@ -104,7 +104,7 @@ public class Gzsl {
     on_parse_complete( data );
   }
   
-  public void ParseFromJson( string json, OnParseComplete on_parse_complete, OnParseError on_parse_error, bool is_async = true ){
+  public void ParseFromJson( string json, OnParseComplete on_parse_complete, OnParseError on_parse_error, bool is_async ){
     m_MonoBehaviour.StartCoroutine( ParseFromJsonCoroutine( json, on_parse_complete, on_parse_error, is_async ) );
   }
   
@@ -117,7 +117,7 @@ public class Gzsl {
     m_ImageSprites = new UnityEngine.Sprite[ 0 ];
   }
   
-  private System.Collections.IEnumerator LoadImageSpritesCoroutine( Data data, OnLoadComplete on_load_complete, OnLoadError on_load_error, bool is_async = true ){
+  private System.Collections.IEnumerator LoadImageSpritesCoroutine( Data data, OnLoadComplete on_load_complete, OnLoadError on_load_error, bool is_async ){
     try{
       m_ImageSprites = new UnityEngine.Sprite[ data.images.Length ];
     }catch ( System.Exception exception ){
@@ -155,20 +155,20 @@ public class Gzsl {
     on_load_complete( this );
   }
   
-  public void Load( byte[] bytes, OnLoadComplete on_load_complete, OnLoadError on_load_error, bool is_async = true ){
+  public void Load( byte[] bytes, OnLoadComplete on_load_complete, OnLoadError on_load_error, bool is_async ){
     Parse( bytes, ( Data data ) => {
       m_MonoBehaviour.StartCoroutine( LoadImageSpritesCoroutine( data, on_load_complete, on_load_error, is_async ) );
     }, ( System.Exception exception ) => {
       on_load_error( this, exception );
-    } );
+    }, is_async );
   }
   
-  public void LoadFromJson( string json, OnLoadComplete on_load_complete, OnLoadError on_load_error, bool is_async = true ){
+  public void LoadFromJson( string json, OnLoadComplete on_load_complete, OnLoadError on_load_error, bool is_async ){
     ParseFromJson( json, ( Data data ) => {
       m_MonoBehaviour.StartCoroutine( LoadImageSpritesCoroutine( data, on_load_complete, on_load_error, is_async ) );
     }, ( System.Exception exception ) => {
       on_load_error( this, exception );
-    } );
+    }, is_async );
   }
   
   public UnityEngine.Sprite GetImageSprite( ref int index ){
