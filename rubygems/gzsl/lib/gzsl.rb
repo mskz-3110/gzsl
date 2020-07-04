@@ -22,17 +22,17 @@ module Gzsl
   def self.parse( path )
     return nil if ! File.exists?( path )
     
-    gzsl_hash = {
+    gzsl = {
       :flags  => 0,
       :images => []
     }
     File.open( path, "rb" ){|f|
-      gzsl_hash[ :flags ] = Dastbytes::Binary.unpack( :uint8, f.read( 1 ) ).first
+      gzsl[ :flags ] = Dastbytes::Binary.unpack( :uint8, f.read( 1 ) ).first
       Dastbytes::Binary.unpack( :uint16, f.read( 2 ) ).first.times{
         image_size = Dastbytes::Binary.unpack( :uint32, f.read( 4 ) ).first
-        gzsl_hash[ :images ].push f.read( image_size )
+        gzsl[ :images ].push f.read( image_size )
       }
     }
-    gzsl_hash
+    gzsl
   end
 end

@@ -49,9 +49,10 @@ public class GzslViewer : UnityEngine.MonoBehaviour {
   public void OnClickLoadButton(){
     string url = m_URLInputField.text;
     if ( m_PDFFileTypeToggle.isOn ){
-      url = "https://short-works.herokuapp.com/pdf/view.json?url="+ url;
-      UnityEngine.Debug.Log( url );
-      m_Web.Get( url, 60, ( UnityEngine.Networking.UnityWebRequest request ) => {
+      Web.Params params = new Web.Params();
+      params.Set( "pdf_url", url );
+      url = "https://short-works.herokuapp.com/pdf/view/json";
+      m_Web.Post( url, params, 60, ( UnityEngine.Networking.UnityWebRequest request ) => {
         m_Gzsl.LoadFromJson( request.downloadHandler.text, OnGzslLoadComplete, ( Gzsl gzsl, System.Exception exception ) => {
           UnityEngine.Debug.LogError( exception +"\n"+ request.downloadHandler.text );
         }, true );
@@ -59,7 +60,6 @@ public class GzslViewer : UnityEngine.MonoBehaviour {
         UnityEngine.Debug.LogError( request.error );
       } );
     }else if ( m_GZSLFileTypeToggle.isOn ){
-      UnityEngine.Debug.Log( url );
       m_Web.Get( url, 60, ( UnityEngine.Networking.UnityWebRequest request ) => {
         m_Gzsl.Load( request.downloadHandler.data, OnGzslLoadComplete, ( Gzsl gzsl, System.Exception exception ) => {
           UnityEngine.Debug.LogError( exception );
